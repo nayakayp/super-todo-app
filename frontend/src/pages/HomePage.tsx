@@ -36,6 +36,8 @@ export function HomePage() {
   const [newDescription, setNewDescription] = useState('');
   const [newPriority, setNewPriority] = useState<Priority>(0);
   const [newDueDate, setNewDueDate] = useState('');
+  const [errors, setErrors] = useState<{ title?: string }>({});
+  const [touched, setTouched] = useState<{ title?: boolean }>({});
 
   const filteredTodos = useMemo(() => {
     switch (filter) {
@@ -48,12 +50,36 @@ export function HomePage() {
     }
   }, [todos, filter]);
 
+  const validateTitle = (value: string): string | undefined => {
+    if (!value.trim()) return 'Title is required';
+    if (value.trim().length < 2) return 'Title must be at least 2 characters';
+    if (value.trim().length > 200) return 'Title must be less than 200 characters';
+    return undefined;
+  };
+
+  const handleTitleChange = (value: string) => {
+    setNewTitle(value);
+    if (touched.title) {
+      setErrors({ ...errors, title: validateTitle(value) });
+    }
+  };
+
+  const handleTitleBlur = () => {
+    setTouched({ ...touched, title: true });
+    setErrors({ ...errors, title: validateTitle(newTitle) });
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTitle.trim()) return;
+    const titleError = validateTitle(newTitle);
+    if (titleError) {
+      setErrors({ title: titleError });
+      setTouched({ title: true });
+      return;
+    }
     await createTodo({
-      title: newTitle,
-      description: newDescription || undefined,
+      title: newTitle.trim(),
+      description: newDescription.trim() || undefined,
       priority: newPriority,
       due_date: newDueDate || undefined
     });
@@ -61,6 +87,8 @@ export function HomePage() {
     setNewDescription('');
     setNewPriority(0);
     setNewDueDate('');
+    setErrors({});
+    setTouched({});
   };
 
   const handleToggle = async (todo: Todo) => {
@@ -86,17 +114,24 @@ export function HomePage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        <form onSubmit={handleCreate} className="mb-8 bg-white p-4 rounded-lg shadow">
+        <form onSubmit={handleCreate} className="mb-8 bg-white p-4 rounded-lg shadow" noValidate>
           <div className="flex gap-4">
-            <input
-              type="text"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              placeholder="What needs to be done?"
-              className="input flex-1"
-              required
-            />
-            <button type="submit" disabled={isCreating} className="btn btn-primary">
+            <div className="flex-1">
+              <input
+                type="text"
+                value={newTitle}
+                onChange={(e) => handleTitleChange(e.target.value)}
+                onBlur={handleTitleBlur}
+                placeholder="What needs to be done?"
+                className={`input w-full ${errors.title && touched.title ? 'border-red-500 focus:ring-red-500' : ''}`}
+                aria-invalid={!!errors.title}
+                aria-describedby={errors.title ? 'title-error' : undefined}
+              />
+              {errors.title && touched.title && (
+                <p id="title-error" className="mt-1 text-sm text-red-600">{errors.title}</p>
+              )}
+            </div>
+            <button type="submit" disabled={isCreating || !!errors.title} className="btn btn-primary self-start">
               {isCreating ? 'Adding...' : 'Add Todo'}
             </button>
           </div>
