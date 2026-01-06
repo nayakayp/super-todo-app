@@ -26,3 +26,4 @@ export { CalendarView, MiniCalendar } from './CalendarView';
 export { MarkdownRenderer, MarkdownPreview } from './MarkdownRenderer';
 export { EisenhowerMatrix, EisenhowerWidget } from './EisenhowerMatrix';
 export { WeeklyReview, WeeklyReviewWidget } from './WeeklyReview';
+export { StreakDisplay, StreakBadge, GoalsSettings, StreakCalendar } from './StreakTracker';

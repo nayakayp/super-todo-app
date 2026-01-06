@@ -28,6 +28,7 @@ import {
   ActiveTimeTrackerWidget,
   QuickAddTemplates,
   ProjectSidebar,
+  StreakDisplay,
 } from '../components/shared';
 import { TodoSearch, DraggableTodoList } from '../components/todos';
 import { useUIStore } from '../stores/uiStore';
@@ -387,6 +388,7 @@ export function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar with stats */}
           <aside className="lg:col-span-1 space-y-6">
+            <StreakDisplay />
             <FocusTimer />
             <ProjectSidebar
               selectedProjectId={selectedProjectId}

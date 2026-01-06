@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
 import { Tag } from './useTags';
+import { useStreakStore } from '../stores/streakStore';
 
 export type RecurrencePattern = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
@@ -31,6 +32,7 @@ type TodoResponse = { todo: Todo };
 
 export function useTodos() {
   const queryClient = useQueryClient();
+  const recordCompletion = useStreakStore((state) => state.recordCompletion);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['todos'],
@@ -56,8 +58,12 @@ export function useTodos() {
   const updateMutation = useMutation({
     mutationFn: ({ id, ...data }: { id: string; title?: string; description?: string; completed?: boolean; priority?: number }) =>
       api.patch<TodoResponse>(`/todos/${id}`, data),
-    onSuccess: () => {
+    onSuccess: (result, variables) => {
       queryClient.invalidateQueries({ queryKey: ['todos'] });
+      // Record streak when completing a todo
+      if (variables.completed && result.todo.completed) {
+        recordCompletion();
+      }
     },
   });
 
