@@ -10,15 +10,26 @@ todosRoutes.get('/', async (c) => {
   const user = c.get('user');
   const { completed, limit = '50', offset = '0' } = c.req.query();
 
-  let query = 'SELECT * FROM todos WHERE user_id = $1';
+  let query = `
+    SELECT t.*,
+           COALESCE(
+             json_agg(
+               json_build_object('id', tg.id, 'name', tg.name, 'color', tg.color)
+             ) FILTER (WHERE tg.id IS NOT NULL),
+             '[]'
+           ) as tags
+    FROM todos t
+    LEFT JOIN todo_tags tt ON t.id = tt.todo_id
+    LEFT JOIN tags tg ON tt.tag_id = tg.id
+    WHERE t.user_id = $1`;
   const params: unknown[] = [user.id];
 
   if (completed !== undefined) {
-    query += ' AND completed = $2';
+    query += ' AND t.completed = $2';
     params.push(completed === 'true');
   }
 
-  query += ' ORDER BY created_at DESC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
+  query += ' GROUP BY t.id ORDER BY t.position NULLS LAST, t.created_at DESC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
   params.push(parseInt(limit), parseInt(offset));
 
   const result = await db.query(query, params);
@@ -117,7 +128,7 @@ todosRoutes.post('/reorder', async (c) => {
   }
 
   // Update positions in a transaction
-  const client = await db.connect();
+  const client = await db.getClient();
   try {
     await client.query('BEGIN');
     for (const item of items) {

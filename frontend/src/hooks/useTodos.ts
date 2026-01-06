@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
+import { Tag } from './useTags';
 
 export type Todo = {
   id: string;
@@ -10,6 +11,7 @@ export type Todo = {
   priority: number;
   due_date: string | null;
   position: number | null;
+  tags: Tag[];
   created_at: string;
   updated_at: string;
 };

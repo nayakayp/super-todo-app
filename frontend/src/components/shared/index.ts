@@ -13,3 +13,4 @@ export { useKeyboardShortcuts, KeyboardShortcutsModal } from './KeyboardShortcut
 export { ToastContainer, useToast } from './Toast';
 export { ConfirmDialog, useConfirm } from './ConfirmDialog';
 export { ExportImportButtons } from './ExportImport';
+export { TagBadge, TagSelector, TagManager } from './TagManager';

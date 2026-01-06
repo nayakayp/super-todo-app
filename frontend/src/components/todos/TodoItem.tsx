@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Todo } from '../../hooks/useTodos';
-import { PrioritySelect, PriorityBadge, Priority, DatePicker, DueDateBadge } from '../shared';
+import { PrioritySelect, PriorityBadge, Priority, DatePicker, DueDateBadge, TagBadge } from '../shared';
 import { cn } from '../../lib/utils';
 
 type TodoItemProps = {
@@ -153,6 +153,13 @@ export function TodoItem({
             <PriorityBadge priority={todo.priority as Priority} />
             <DueDateBadge dueDate={todo.due_date} />
           </div>
+          {todo.tags && todo.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {todo.tags.map((tag) => (
+                <TagBadge key={tag.id} tag={tag} />
+              ))}
+            </div>
+          )}
           {todo.description && (
             <p
               className={cn(
