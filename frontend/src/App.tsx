@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryProvider } from './lib/queryClient';
 import { useAuthStore } from './stores/authStore';
+import { useTheme } from './hooks/useTheme';
 import { HomePage } from './pages/HomePage';
 import { SignInPage } from './pages/SignInPage';
 import { SignUpPage } from './pages/SignUpPage';
@@ -23,6 +24,8 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+  useTheme();
+
   return (
     <QueryProvider>
       <BrowserRouter>
