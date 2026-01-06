@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useTodos, Todo } from '../hooks/useTodos';
 import { useAuth } from '../hooks/useAuth';
-import { EmptyState } from '../components/shared';
+import { EmptyState, TodoListSkeleton } from '../components/shared';
 
 function TodoItem({ todo, onToggle, onDelete }: { todo: Todo; onToggle: () => void; onDelete: () => void }) {
   return (
@@ -84,7 +84,7 @@ export function HomePage() {
         </form>
 
         {isLoading ? (
-          <p className="text-center text-gray-600">Loading todos...</p>
+          <TodoListSkeleton count={3} />
         ) : todos.length === 0 ? (
           <EmptyState
             title="No todos yet"
