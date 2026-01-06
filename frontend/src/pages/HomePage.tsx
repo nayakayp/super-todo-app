@@ -1,12 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useTodos, Todo } from '../hooks/useTodos';
 import { useAuth } from '../hooks/useAuth';
-import { EmptyState, TodoListSkeleton, FilterTabs, PrioritySelect, PriorityBadge, Priority, DatePicker, DueDateBadge } from '../components/shared';
+import { EmptyState, TodoListSkeleton, FilterTabs, PrioritySelect, PriorityBadge, Priority, DatePicker, DueDateBadge, ThemeToggle } from '../components/shared';
 import { useUIStore } from '../stores/uiStore';
 
 function TodoItem({ todo, onToggle, onDelete }: { todo: Todo; onToggle: () => void; onDelete: () => void }) {
   return (
-    <div className={`flex items-center gap-4 p-4 bg-white rounded-lg shadow ${todo.completed ? 'opacity-60' : ''}`}>
+    <div className={`flex items-center gap-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow ${todo.completed ? 'opacity-60' : ''}`}>
       <input
         type="checkbox"
         checked={todo.completed}
@@ -15,11 +15,11 @@ function TodoItem({ todo, onToggle, onDelete }: { todo: Todo; onToggle: () => vo
       />
       <div className="flex-1">
         <div className="flex items-center gap-2">
-          <h3 className={`font-medium ${todo.completed ? 'line-through' : ''}`}>{todo.title}</h3>
+          <h3 className={`font-medium dark:text-white ${todo.completed ? 'line-through' : ''}`}>{todo.title}</h3>
           <PriorityBadge priority={todo.priority as Priority} />
           <DueDateBadge dueDate={todo.due_date} />
         </div>
-        {todo.description && <p className="text-gray-600 text-sm">{todo.description}</p>}
+        {todo.description && <p className="text-gray-600 dark:text-gray-400 text-sm">{todo.description}</p>}
       </div>
       <button onClick={onDelete} className="text-red-500 hover:text-red-700">
         Delete
@@ -100,13 +100,14 @@ export function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <header className="bg-white dark:bg-gray-800 shadow">
         <div className="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Super Todo App</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Super Todo App</h1>
           <div className="flex items-center gap-4">
-            <span className="text-gray-600">{user?.email}</span>
-            <button onClick={() => signOut()} disabled={isSigningOut} className="text-blue-600 hover:underline">
+            <ThemeToggle />
+            <span className="text-gray-600 dark:text-gray-300">{user?.email}</span>
+            <button onClick={() => signOut()} disabled={isSigningOut} className="text-blue-600 dark:text-blue-400 hover:underline">
               Sign Out
             </button>
           </div>
@@ -114,7 +115,7 @@ export function HomePage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        <form onSubmit={handleCreate} className="mb-8 bg-white p-4 rounded-lg shadow" noValidate>
+        <form onSubmit={handleCreate} className="mb-8 bg-white dark:bg-gray-800 p-4 rounded-lg shadow" noValidate>
           <div className="flex gap-4">
             <div className="flex-1">
               <input
@@ -144,11 +145,11 @@ export function HomePage() {
           />
           <div className="mt-2 flex items-center gap-4">
             <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600">Priority:</label>
+              <label className="text-sm text-gray-600 dark:text-gray-300">Priority:</label>
               <PrioritySelect value={newPriority} onChange={setNewPriority} />
             </div>
             <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600">Due date:</label>
+              <label className="text-sm text-gray-600 dark:text-gray-300">Due date:</label>
               <DatePicker value={newDueDate} onChange={setNewDueDate} />
             </div>
           </div>
