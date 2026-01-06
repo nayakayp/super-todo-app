@@ -59,12 +59,35 @@ export function useTodos() {
   const updateMutation = useMutation({
     mutationFn: ({ id, ...data }: { id: string; title?: string; description?: string; completed?: boolean; priority?: number }) =>
       api.patch<TodoResponse>(`/todos/${id}`, data),
+    onMutate: async (variables) => {
+      // Optimistically update the todo in the cache
+      await queryClient.cancelQueries({ queryKey: ['todos'] });
+      const previousTodos = queryClient.getQueryData<TodosResponse>(['todos']);
+
+      if (previousTodos) {
+        queryClient.setQueryData<TodosResponse>(['todos'], {
+          todos: previousTodos.todos.map((todo) =>
+            todo.id === variables.id ? { ...todo, ...variables } : todo
+          ),
+        });
+      }
+
+      return { previousTodos };
+    },
+    onError: (_err, _variables, context) => {
+      // Rollback on error
+      if (context?.previousTodos) {
+        queryClient.setQueryData(['todos'], context.previousTodos);
+      }
+    },
     onSuccess: (result, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['todos'] });
       // Record streak when completing a todo
       if (variables.completed && result.todo.completed) {
         recordCompletion();
       }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['todos'] });
     },
   });
 

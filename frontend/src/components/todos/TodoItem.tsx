@@ -128,6 +128,7 @@ export function TodoItem({
 
   return (
     <div
+      data-testid="todo-item"
       className={cn(
         'group p-4 bg-white dark:bg-gray-800 rounded-lg shadow transition-all',
         todo.completed && 'opacity-60',

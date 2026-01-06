@@ -12,6 +12,7 @@ export type AuthUser = {
 declare module 'hono' {
   interface ContextVariableMap {
     user: AuthUser;
+    userId: string;
   }
 }
 
@@ -33,6 +34,11 @@ export async function authMiddleware(c: Context, next: Next) {
     return c.json({ error: 'Session expired' }, 401);
   }
 
-  c.set('user', result.rows[0] as AuthUser);
+  const user = result.rows[0] as AuthUser;
+  c.set('user', user);
+  c.set('userId', user.id);
   await next();
 }
+
+// Alias for route-level middleware usage
+export const requireAuth = authMiddleware;
