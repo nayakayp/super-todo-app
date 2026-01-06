@@ -5,6 +5,8 @@ import { authRoutes } from './auth/routes';
 import { todosRoutes } from './todos/routes';
 import { tagsRoutes } from './tags/routes';
 import { subtasksRoutes } from './subtasks/routes';
+import timeEntriesRoutes from './time-entries/routes';
+import templatesRoutes from './templates/routes';
 import { errorHandler } from './middleware/errorHandler';
 
 const app = new Hono();
@@ -29,5 +31,7 @@ app.route('/api/auth', authRoutes);
 app.route('/api/todos', todosRoutes);
 app.route('/api/tags', tagsRoutes);
 app.route('/api/subtasks', subtasksRoutes);
+app.route('/api/time-entries', timeEntriesRoutes);
+app.route('/api/templates', templatesRoutes);
 
 export { app };

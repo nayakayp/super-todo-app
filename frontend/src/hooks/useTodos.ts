@@ -20,6 +20,7 @@ export type Todo = {
   recurrence_end_date: string | null;
   next_occurrence: string | null;
   original_todo_id: string | null;
+  total_time_spent: number | null;
   created_at: string;
   updated_at: string;
 };

@@ -25,6 +25,8 @@ import {
   useUndoableDelete,
   FocusTimer,
   FocusTimerCompact,
+  ActiveTimeTrackerWidget,
+  QuickAddTemplates,
 } from '../components/shared';
 import { TodoSearch, DraggableTodoList } from '../components/todos';
 import { useUIStore } from '../stores/uiStore';
@@ -375,6 +377,7 @@ export function HomePage() {
           {/* Sidebar with stats */}
           <aside className="lg:col-span-1 space-y-6">
             <FocusTimer />
+            <QuickAddTemplates />
             <ProgressStats todos={todos} />
             <Link
               to="/stats"
@@ -577,6 +580,9 @@ export function HomePage() {
 
       {/* Floating focus timer when scrolling */}
       <FocusTimerCompact />
+
+      {/* Floating time tracker widget */}
+      <ActiveTimeTrackerWidget />
     </div>
   );
 }

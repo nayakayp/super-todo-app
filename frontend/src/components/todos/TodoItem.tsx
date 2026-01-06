@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { Todo } from '../../hooks/useTodos';
-import { PrioritySelect, PriorityBadge, Priority, DatePicker, DueDateBadge, TagBadge, RecurrenceBadge } from '../shared';
+import { PrioritySelect, PriorityBadge, Priority, DatePicker, DueDateBadge, TagBadge, RecurrenceBadge, TimeTracker, TimeEntryList } from '../shared';
 import { SubtaskList } from './SubtaskList';
 import { cn } from '../../lib/utils';
 import { useFocusStore } from '../../stores/focusStore';
+import { formatDuration } from '../../hooks/useTimeEntries';
 
 type TodoItemProps = {
   todo: Todo;
@@ -33,6 +34,7 @@ export function TodoItem({
   const [editDueDate, setEditDueDate] = useState(todo.due_date || '');
   const [isExpanded, setIsExpanded] = useState(false);
   const [showSubtasks, setShowSubtasks] = useState(false);
+  const [showTimeTracking, setShowTimeTracking] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   const { isActive, focusedTodoId, startTimer } = useFocusStore();
@@ -186,18 +188,39 @@ export function TodoItem({
               )}
             </p>
           )}
-          <div className="mt-2 text-xs text-gray-400 dark:text-gray-500 flex items-center gap-2">
+          <div className="mt-2 text-xs text-gray-400 dark:text-gray-500 flex items-center gap-2 flex-wrap">
             <span>Created {new Date(todo.created_at).toLocaleDateString()}</span>
+            {(todo.total_time_spent ?? 0) > 0 && (
+              <span className="text-purple-600 dark:text-purple-400">
+                {formatDuration(todo.total_time_spent!)} tracked
+              </span>
+            )}
             <button
               onClick={() => setShowSubtasks(!showSubtasks)}
               className="text-blue-500 hover:text-blue-600 dark:hover:text-blue-400"
             >
               {showSubtasks ? 'Hide' : 'Show'} subtasks
             </button>
+            <button
+              onClick={() => setShowTimeTracking(!showTimeTracking)}
+              className="text-purple-500 hover:text-purple-600 dark:hover:text-purple-400"
+            >
+              {showTimeTracking ? 'Hide' : 'Show'} time tracking
+            </button>
           </div>
           {showSubtasks && (
             <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
               <SubtaskList todoId={todo.id} />
+            </div>
+          )}
+          {showTimeTracking && (
+            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 space-y-3">
+              <TimeTracker
+                todoId={todo.id}
+                todoTitle={todo.title}
+                totalTimeSpent={todo.total_time_spent ?? 0}
+              />
+              <TimeEntryList todoId={todo.id} />
             </div>
           )}
         </div>

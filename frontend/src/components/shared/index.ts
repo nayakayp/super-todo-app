@@ -17,3 +17,5 @@ export { TagBadge, TagSelector, TagManager } from './TagManager';
 export { UndoToast, useUndoableDelete } from './UndoToast';
 export { FocusTimer, FocusTimerCompact, FocusSettingsModal } from './FocusTimer';
 export { RecurrenceSelect, RecurrenceBadge } from './RecurrenceSelect';
+export { TimeTracker, ActiveTimeTrackerWidget, TimeEntryList } from './TimeTracker';
+export { QuickAddTemplates } from './QuickAddTemplates';
