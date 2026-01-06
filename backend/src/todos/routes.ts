@@ -66,7 +66,7 @@ todosRoutes.patch('/:id', async (c) => {
     return c.json({ error: 'Todo not found' }, 404);
   }
 
-  const allowedFields = ['title', 'description', 'completed', 'priority', 'due_date'];
+  const allowedFields = ['title', 'description', 'completed', 'priority', 'due_date', 'position'];
   const setClause: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;
@@ -102,6 +102,38 @@ todosRoutes.delete('/:id', async (c) => {
 
   if (result.rows.length === 0) {
     return c.json({ error: 'Todo not found' }, 404);
+  }
+
+  return c.json({ success: true });
+});
+
+// Batch reorder endpoint
+todosRoutes.post('/reorder', async (c) => {
+  const user = c.get('user');
+  const { items } = await c.req.json();
+
+  if (!Array.isArray(items)) {
+    return c.json({ error: 'Items must be an array' }, 400);
+  }
+
+  // Update positions in a transaction
+  const client = await db.connect();
+  try {
+    await client.query('BEGIN');
+    for (const item of items) {
+      if (item.id && typeof item.position === 'number') {
+        await client.query(
+          'UPDATE todos SET position = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 AND user_id = $3',
+          [item.position, item.id, user.id]
+        );
+      }
+    }
+    await client.query('COMMIT');
+  } catch (error) {
+    await client.query('ROLLBACK');
+    throw error;
+  } finally {
+    client.release();
   }
 
   return c.json({ success: true });

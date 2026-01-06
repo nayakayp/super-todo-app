@@ -16,18 +16,26 @@ import {
   ProgressStats,
   useKeyboardShortcuts,
   KeyboardShortcutsModal,
+  ToastContainer,
+  useToast,
+  useConfirm,
+  ExportImportButtons,
 } from '../components/shared';
-import { TodoSearch, TodoItem } from '../components/todos';
+import { TodoSearch, DraggableTodoList } from '../components/todos';
 import { useUIStore } from '../stores/uiStore';
 
 export function HomePage() {
   const { user, signOut, isSigningOut } = useAuth();
-  const { todos, isLoading, createTodo, updateTodo, deleteTodo, isCreating } = useTodos();
+  const { todos, isLoading, createTodo, updateTodo, deleteTodo, reorderTodos, isCreating } = useTodos();
   const filter = useUIStore((state) => state.filter);
   const setFilter = useUIStore((state) => state.setFilter);
   const searchQuery = useUIStore((state) => state.searchQuery);
   const theme = useUIStore((state) => state.theme);
   const setTheme = useUIStore((state) => state.setTheme);
+
+  // Toast and confirm hooks
+  const toast = useToast();
+  const { confirm, ConfirmDialog: ConfirmDialogComponent } = useConfirm();
 
   // Form state
   const [newTitle, setNewTitle] = useState('');
@@ -156,6 +164,7 @@ export function HomePage() {
       priority: newPriority,
       due_date: newDueDate || undefined,
     });
+    toast.success('Todo created successfully!');
     setNewTitle('');
     setNewDescription('');
     setNewPriority(0);
@@ -187,14 +196,22 @@ export function HomePage() {
 
   const handleDelete = useCallback(
     async (id: string) => {
+      const confirmed = await confirm({
+        title: 'Delete Todo',
+        message: 'Are you sure you want to delete this todo? This action cannot be undone.',
+        confirmText: 'Delete',
+        variant: 'danger',
+      });
+      if (!confirmed) return;
       await deleteTodo(id);
+      toast.success('Todo deleted');
       setSelectedIds((prev) => {
         const next = new Set(prev);
         next.delete(id);
         return next;
       });
     },
-    [deleteTodo]
+    [deleteTodo, confirm, toast]
   );
 
   const handleSelect = (id: string, selected: boolean) => {
@@ -217,8 +234,16 @@ export function HomePage() {
   };
 
   const handleBulkDelete = async () => {
+    const confirmed = await confirm({
+      title: 'Delete Selected Todos',
+      message: `Are you sure you want to delete ${selectedIds.size} todo(s)? This action cannot be undone.`,
+      confirmText: 'Delete All',
+      variant: 'danger',
+    });
+    if (!confirmed) return;
     const ids = Array.from(selectedIds);
     await Promise.all(ids.map((id) => deleteTodo(id)));
+    toast.success(`${ids.length} todo(s) deleted`);
     setSelectedIds(new Set());
     setSelectMode(false);
   };
@@ -226,6 +251,7 @@ export function HomePage() {
   const handleBulkComplete = async () => {
     const ids = Array.from(selectedIds);
     await Promise.all(ids.map((id) => updateTodo({ id, completed: true })));
+    toast.success(`${ids.length} todo(s) marked as complete`);
     setSelectedIds(new Set());
     setSelectMode(false);
   };
@@ -233,9 +259,72 @@ export function HomePage() {
   const handleBulkUncomplete = async () => {
     const ids = Array.from(selectedIds);
     await Promise.all(ids.map((id) => updateTodo({ id, completed: false })));
+    toast.success(`${ids.length} todo(s) marked as incomplete`);
     setSelectedIds(new Set());
     setSelectMode(false);
   };
+
+  const handleClearCompleted = async () => {
+    const completedTodos = todos.filter((t) => t.completed);
+    if (completedTodos.length === 0) {
+      toast.info('No completed todos to clear');
+      return;
+    }
+    const confirmed = await confirm({
+      title: 'Clear Completed Todos',
+      message: `Are you sure you want to delete ${completedTodos.length} completed todo(s)?`,
+      confirmText: 'Clear All',
+      variant: 'warning',
+    });
+    if (!confirmed) return;
+    await Promise.all(completedTodos.map((t) => deleteTodo(t.id)));
+    toast.success(`${completedTodos.length} completed todo(s) cleared`);
+  };
+
+  const handleImport = async (importedTodos: Partial<Todo>[]) => {
+    let successCount = 0;
+    for (const todo of importedTodos) {
+      try {
+        await createTodo({
+          title: todo.title || 'Untitled',
+          description: todo.description ?? undefined,
+          priority: todo.priority || 0,
+          due_date: todo.due_date ?? undefined,
+        });
+        successCount++;
+      } catch {
+        // Skip failed imports
+      }
+    }
+    toast.success(`Imported ${successCount} todo(s) successfully!`);
+  };
+
+  const handleDuplicate = useCallback(
+    async (todo: Todo) => {
+      await createTodo({
+        title: `${todo.title} (copy)`,
+        description: todo.description ?? undefined,
+        priority: todo.priority,
+        due_date: todo.due_date ?? undefined,
+      });
+      toast.success('Todo duplicated');
+    },
+    [createTodo, toast]
+  );
+
+  const handleReorder = useCallback(
+    async (items: { id: string; position: number }[]) => {
+      try {
+        await reorderTodos(items);
+      } catch {
+        toast.error('Failed to reorder todos');
+      }
+    },
+    [reorderTodos, toast]
+  );
+
+  // Check if drag is allowed (only when no filter/search/custom sort is active)
+  const isDragEnabled = filter === 'all' && !searchQuery.trim() && sortBy === 'created';
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -365,6 +454,14 @@ export function HomePage() {
                       setSortDirection(dir);
                     }}
                   />
+                  <ExportImportButtons todos={todos} onImport={handleImport} />
+                  <button
+                    onClick={handleClearCompleted}
+                    className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300"
+                    title="Clear all completed todos"
+                  >
+                    Clear Done
+                  </button>
                   <button
                     onClick={() => {
                       setSelectMode(!selectMode);
@@ -418,20 +515,18 @@ export function HomePage() {
                 }
               />
             ) : (
-              <div className="space-y-3">
-                {filteredTodos.map((todo) => (
-                  <TodoItem
-                    key={todo.id}
-                    todo={todo}
-                    onToggle={() => handleToggle(todo)}
-                    onDelete={() => handleDelete(todo.id)}
-                    onUpdate={(updates) => handleUpdate(todo.id, updates)}
-                    isSelected={selectedIds.has(todo.id)}
-                    onSelect={(selected) => handleSelect(todo.id, selected)}
-                    showCheckbox={selectMode}
-                  />
-                ))}
-              </div>
+              <DraggableTodoList
+                todos={filteredTodos}
+                onReorder={handleReorder}
+                onToggle={handleToggle}
+                onDelete={handleDelete}
+                onUpdate={handleUpdate}
+                onDuplicate={handleDuplicate}
+                selectedIds={selectedIds}
+                onSelect={handleSelect}
+                showCheckbox={selectMode}
+                isDragDisabled={!isDragEnabled}
+              />
             )}
 
             {/* Footer stats */}
@@ -447,6 +542,12 @@ export function HomePage() {
 
       {/* Keyboard shortcuts modal */}
       <KeyboardShortcutsModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+
+      {/* Confirm dialog */}
+      {ConfirmDialogComponent}
+
+      {/* Toast notifications */}
+      <ToastContainer />
     </div>
   );
 }

@@ -9,6 +9,7 @@ export type Todo = {
   completed: boolean;
   priority: number;
   due_date: string | null;
+  position: number | null;
   created_at: string;
   updated_at: string;
 };
@@ -47,6 +48,35 @@ export function useTodos() {
     },
   });
 
+  const reorderMutation = useMutation({
+    mutationFn: (items: { id: string; position: number }[]) =>
+      api.post<{ success: boolean }>('/todos/reorder', { items }),
+    onMutate: async (items) => {
+      // Optimistically update the cache
+      await queryClient.cancelQueries({ queryKey: ['todos'] });
+      const previousTodos = queryClient.getQueryData<TodosResponse>(['todos']);
+
+      if (previousTodos) {
+        const positionMap = new Map(items.map((item) => [item.id, item.position]));
+        const updatedTodos = previousTodos.todos.map((todo) => ({
+          ...todo,
+          position: positionMap.get(todo.id) ?? todo.position,
+        }));
+        queryClient.setQueryData(['todos'], { todos: updatedTodos });
+      }
+
+      return { previousTodos };
+    },
+    onError: (_err, _items, context) => {
+      if (context?.previousTodos) {
+        queryClient.setQueryData(['todos'], context.previousTodos);
+      }
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['todos'] });
+    },
+  });
+
   return {
     todos: data?.todos ?? [],
     isLoading,
@@ -54,8 +84,10 @@ export function useTodos() {
     createTodo: createMutation.mutateAsync,
     updateTodo: updateMutation.mutateAsync,
     deleteTodo: deleteMutation.mutateAsync,
+    reorderTodos: reorderMutation.mutateAsync,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
+    isReordering: reorderMutation.isPending,
   };
 }
