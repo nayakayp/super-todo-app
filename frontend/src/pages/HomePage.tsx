@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTodos, Todo } from '../hooks/useTodos';
 import { useAuth } from '../hooks/useAuth';
-import { EmptyState, TodoListSkeleton, FilterTabs, PrioritySelect, PriorityBadge, Priority } from '../components/shared';
+import { EmptyState, TodoListSkeleton, FilterTabs, PrioritySelect, PriorityBadge, Priority, DatePicker, DueDateBadge } from '../components/shared';
 import { useUIStore } from '../stores/uiStore';
 
 function TodoItem({ todo, onToggle, onDelete }: { todo: Todo; onToggle: () => void; onDelete: () => void }) {
@@ -17,6 +17,7 @@ function TodoItem({ todo, onToggle, onDelete }: { todo: Todo; onToggle: () => vo
         <div className="flex items-center gap-2">
           <h3 className={`font-medium ${todo.completed ? 'line-through' : ''}`}>{todo.title}</h3>
           <PriorityBadge priority={todo.priority as Priority} />
+          <DueDateBadge dueDate={todo.due_date} />
         </div>
         {todo.description && <p className="text-gray-600 text-sm">{todo.description}</p>}
       </div>
@@ -34,6 +35,7 @@ export function HomePage() {
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newPriority, setNewPriority] = useState<Priority>(0);
+  const [newDueDate, setNewDueDate] = useState('');
 
   const filteredTodos = useMemo(() => {
     switch (filter) {
@@ -49,10 +51,16 @@ export function HomePage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
-    await createTodo({ title: newTitle, description: newDescription || undefined, priority: newPriority });
+    await createTodo({
+      title: newTitle,
+      description: newDescription || undefined,
+      priority: newPriority,
+      due_date: newDueDate || undefined
+    });
     setNewTitle('');
     setNewDescription('');
     setNewPriority(0);
+    setNewDueDate('');
   };
 
   const handleToggle = async (todo: Todo) => {
@@ -99,9 +107,15 @@ export function HomePage() {
             placeholder="Description (optional)"
             className="input mt-2"
           />
-          <div className="mt-2 flex items-center gap-2">
-            <label className="text-sm text-gray-600">Priority:</label>
-            <PrioritySelect value={newPriority} onChange={setNewPriority} />
+          <div className="mt-2 flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-gray-600">Priority:</label>
+              <PrioritySelect value={newPriority} onChange={setNewPriority} />
+            </div>
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-gray-600">Due date:</label>
+              <DatePicker value={newDueDate} onChange={setNewDueDate} />
+            </div>
           </div>
         </form>
 
