@@ -4,6 +4,7 @@ import { useAuthStore } from './stores/authStore';
 import { useTheme } from './hooks/useTheme';
 import { HomePage } from './pages/HomePage';
 import { StatsPage } from './pages/StatsPage';
+import { CalendarPage } from './pages/CalendarPage';
 import { SignInPage } from './pages/SignInPage';
 import { SignUpPage } from './pages/SignUpPage';
 import './index.css';
@@ -33,6 +34,7 @@ function App() {
         <Routes>
           <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
           <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
+          <Route path="/calendar" element={<ProtectedRoute><CalendarPage /></ProtectedRoute>} />
           <Route path="/sign-in" element={<PublicRoute><SignInPage /></PublicRoute>} />
           <Route path="/sign-up" element={<PublicRoute><SignUpPage /></PublicRoute>} />
         </Routes>

@@ -22,3 +22,4 @@ export { QuickAddTemplates } from './QuickAddTemplates';
 export { ProjectSelector, ProjectSidebar, ProjectBadge } from './ProjectManager';
 export { NaturalDatePicker, CompactNaturalDatePicker } from './NaturalDatePicker';
 export { ActivityFeed, TodoActivityHistory, ActivityTimeline } from './ActivityFeed';
+export { CalendarView, MiniCalendar } from './CalendarView';
