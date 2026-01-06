@@ -14,6 +14,7 @@ export type Todo = {
   due_date: string | null;
   position: number | null;
   tags: Tag[];
+  project_id: string | null;
   recurrence_pattern: RecurrencePattern | null;
   recurrence_interval: number | null;
   recurrence_days_of_week: number[] | null;

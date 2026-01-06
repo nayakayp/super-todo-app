@@ -27,10 +27,12 @@ import {
   FocusTimerCompact,
   ActiveTimeTrackerWidget,
   QuickAddTemplates,
+  ProjectSidebar,
 } from '../components/shared';
 import { TodoSearch, DraggableTodoList } from '../components/todos';
 import { useUIStore } from '../stores/uiStore';
 import { useUndoStore } from '../stores/undoStore';
+import { useProjects } from '../hooks/useProjects';
 
 export function HomePage() {
   const { user, signOut, isSigningOut } = useAuth();
@@ -62,6 +64,10 @@ export function HomePage() {
   // Selection state
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Project state
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const { projects } = useProjects();
 
   // Refs
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -96,6 +102,11 @@ export function HomePage() {
 
     // Filter out pending deletes
     result = result.filter((todo) => !pendingDeleteIds.has(todo.id));
+
+    // Filter by project
+    if (selectedProjectId) {
+      result = result.filter((todo) => todo.project_id === selectedProjectId);
+    }
 
     // Filter by search query
     if (searchQuery.trim()) {
@@ -142,7 +153,7 @@ export function HomePage() {
     });
 
     return result;
-  }, [todos, filter, searchQuery, sortBy, sortDirection, pendingDeleteIds]);
+  }, [todos, filter, searchQuery, sortBy, sortDirection, pendingDeleteIds, selectedProjectId]);
 
   const validateTitle = (value: string): string | undefined => {
     if (!value.trim()) return 'Title is required';
@@ -377,6 +388,10 @@ export function HomePage() {
           {/* Sidebar with stats */}
           <aside className="lg:col-span-1 space-y-6">
             <FocusTimer />
+            <ProjectSidebar
+              selectedProjectId={selectedProjectId}
+              onSelectProject={setSelectedProjectId}
+            />
             <QuickAddTemplates />
             <ProgressStats todos={todos} />
             <Link
