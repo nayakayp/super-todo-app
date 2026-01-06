@@ -23,6 +23,7 @@ export type Todo = {
   next_occurrence: string | null;
   original_todo_id: string | null;
   total_time_spent: number | null;
+  pinned?: boolean;
   created_at: string;
   updated_at: string;
 };
