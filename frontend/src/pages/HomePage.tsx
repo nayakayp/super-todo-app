@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useTodos, Todo } from '../hooks/useTodos';
 import { useAuth } from '../hooks/useAuth';
 import { EmptyState, TodoListSkeleton, FilterTabs, PrioritySelect, PriorityBadge, Priority, DatePicker, DueDateBadge, ThemeToggle } from '../components/shared';
+import { TodoSearch } from '../components/todos';
 import { useUIStore } from '../stores/uiStore';
 
 function TodoItem({ todo, onToggle, onDelete }: { todo: Todo; onToggle: () => void; onDelete: () => void }) {
@@ -32,6 +33,7 @@ export function HomePage() {
   const { user, signOut, isSigningOut } = useAuth();
   const { todos, isLoading, createTodo, updateTodo, deleteTodo, isCreating } = useTodos();
   const filter = useUIStore((state) => state.filter);
+  const searchQuery = useUIStore((state) => state.searchQuery);
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newPriority, setNewPriority] = useState<Priority>(0);
@@ -40,15 +42,28 @@ export function HomePage() {
   const [touched, setTouched] = useState<{ title?: boolean }>({});
 
   const filteredTodos = useMemo(() => {
+    let result = todos;
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (todo) =>
+          todo.title.toLowerCase().includes(query) ||
+          todo.description?.toLowerCase().includes(query)
+      );
+    }
+
+    // Filter by status
     switch (filter) {
       case 'active':
-        return todos.filter((todo) => !todo.completed);
+        return result.filter((todo) => !todo.completed);
       case 'completed':
-        return todos.filter((todo) => todo.completed);
+        return result.filter((todo) => todo.completed);
       default:
-        return todos;
+        return result;
     }
-  }, [todos, filter]);
+  }, [todos, filter, searchQuery]);
 
   const validateTitle = (value: string): string | undefined => {
     if (!value.trim()) return 'Title is required';
@@ -156,7 +171,8 @@ export function HomePage() {
         </form>
 
         {todos.length > 0 && (
-          <div className="mb-6 flex justify-center">
+          <div className="mb-6 flex flex-col sm:flex-row justify-center items-center gap-4">
+            <TodoSearch className="w-full sm:w-64" />
             <FilterTabs />
           </div>
         )}
