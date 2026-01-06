@@ -20,9 +20,12 @@ import {
   useToast,
   useConfirm,
   ExportImportButtons,
+  UndoToast,
+  useUndoableDelete,
 } from '../components/shared';
 import { TodoSearch, DraggableTodoList } from '../components/todos';
 import { useUIStore } from '../stores/uiStore';
+import { useUndoStore } from '../stores/undoStore';
 
 export function HomePage() {
   const { user, signOut, isSigningOut } = useAuth();
@@ -36,6 +39,7 @@ export function HomePage() {
   // Toast and confirm hooks
   const toast = useToast();
   const { confirm, ConfirmDialog: ConfirmDialogComponent } = useConfirm();
+  const { addPendingDelete } = useUndoableDelete();
 
   // Form state
   const [newTitle, setNewTitle] = useState('');
@@ -81,8 +85,12 @@ export function HomePage() {
   });
 
   // Filtered and sorted todos
+  const pendingDeleteIds = useUndoStore((state) => new Set(state.pendingDeletes.map((p) => p.todo.id)));
   const filteredTodos = useMemo(() => {
     let result = [...todos];
+
+    // Filter out pending deletes
+    result = result.filter((todo) => !pendingDeleteIds.has(todo.id));
 
     // Filter by search query
     if (searchQuery.trim()) {
@@ -129,7 +137,7 @@ export function HomePage() {
     });
 
     return result;
-  }, [todos, filter, searchQuery, sortBy, sortDirection]);
+  }, [todos, filter, searchQuery, sortBy, sortDirection, pendingDeleteIds]);
 
   const validateTitle = (value: string): string | undefined => {
     if (!value.trim()) return 'Title is required';
@@ -195,23 +203,23 @@ export function HomePage() {
   );
 
   const handleDelete = useCallback(
-    async (id: string) => {
-      const confirmed = await confirm({
-        title: 'Delete Todo',
-        message: 'Are you sure you want to delete this todo? This action cannot be undone.',
-        confirmText: 'Delete',
-        variant: 'danger',
+    (id: string) => {
+      // Find the todo to enable undo
+      const todoToDelete = todos.find((t) => t.id === id);
+      if (!todoToDelete) return;
+
+      // Add to pending deletes with undo option
+      addPendingDelete(todoToDelete, async () => {
+        await deleteTodo(id);
       });
-      if (!confirmed) return;
-      await deleteTodo(id);
-      toast.success('Todo deleted');
+
       setSelectedIds((prev) => {
         const next = new Set(prev);
         next.delete(id);
         return next;
       });
     },
-    [deleteTodo, confirm, toast]
+    [todos, deleteTodo, addPendingDelete]
   );
 
   const handleSelect = (id: string, selected: boolean) => {
@@ -548,6 +556,9 @@ export function HomePage() {
 
       {/* Toast notifications */}
       <ToastContainer />
+
+      {/* Undo delete notifications */}
+      <UndoToast />
     </div>
   );
 }
