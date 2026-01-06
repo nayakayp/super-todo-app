@@ -22,6 +22,8 @@ import {
   ExportImportButtons,
   UndoToast,
   useUndoableDelete,
+  FocusTimer,
+  FocusTimerCompact,
 } from '../components/shared';
 import { TodoSearch, DraggableTodoList } from '../components/todos';
 import { useUIStore } from '../stores/uiStore';
@@ -371,6 +373,7 @@ export function HomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar with stats */}
           <aside className="lg:col-span-1 space-y-6">
+            <FocusTimer />
             <ProgressStats todos={todos} />
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Quick Tips</h3>
@@ -559,6 +562,9 @@ export function HomePage() {
 
       {/* Undo delete notifications */}
       <UndoToast />
+
+      {/* Floating focus timer when scrolling */}
+      <FocusTimerCompact />
     </div>
   );
 }

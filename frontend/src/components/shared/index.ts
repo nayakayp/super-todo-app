@@ -15,3 +15,4 @@ export { ConfirmDialog, useConfirm } from './ConfirmDialog';
 export { ExportImportButtons } from './ExportImport';
 export { TagBadge, TagSelector, TagManager } from './TagManager';
 export { UndoToast, useUndoableDelete } from './UndoToast';
+export { FocusTimer, FocusTimerCompact, FocusSettingsModal } from './FocusTimer';

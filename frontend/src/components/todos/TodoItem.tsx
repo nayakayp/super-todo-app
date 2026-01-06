@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Todo } from '../../hooks/useTodos';
 import { PrioritySelect, PriorityBadge, Priority, DatePicker, DueDateBadge, TagBadge } from '../shared';
 import { cn } from '../../lib/utils';
+import { useFocusStore } from '../../stores/focusStore';
 
 type TodoItemProps = {
   todo: Todo;
@@ -31,6 +32,9 @@ export function TodoItem({
   const [editDueDate, setEditDueDate] = useState(todo.due_date || '');
   const [isExpanded, setIsExpanded] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
+
+  const { isActive, focusedTodoId, startTimer } = useFocusStore();
+  const isFocused = focusedTodoId === todo.id;
 
   useEffect(() => {
     if (isEditing && titleInputRef.current) {
@@ -120,7 +124,8 @@ export function TodoItem({
       className={cn(
         'group p-4 bg-white dark:bg-gray-800 rounded-lg shadow transition-all',
         todo.completed && 'opacity-60',
-        isSelected && 'ring-2 ring-blue-500'
+        isSelected && 'ring-2 ring-blue-500',
+        isFocused && 'ring-2 ring-red-500 bg-red-50 dark:bg-red-900/20'
       )}
     >
       <div className="flex items-start gap-3">
@@ -183,6 +188,24 @@ export function TodoItem({
           </div>
         </div>
         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          {!todo.completed && (
+            <button
+              onClick={() => startTimer(todo.id)}
+              disabled={isActive}
+              className={cn(
+                'p-1.5 rounded',
+                isFocused
+                  ? 'text-red-600 dark:text-red-400'
+                  : 'text-gray-500 hover:text-red-600 dark:hover:text-red-400',
+                isActive && !isFocused && 'opacity-50 cursor-not-allowed'
+              )}
+              title={isFocused ? 'Currently focusing' : isActive ? 'Stop current focus first' : 'Start focus timer'}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+          )}
           <button
             onClick={() => setIsEditing(true)}
             className="p-1.5 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 rounded"
