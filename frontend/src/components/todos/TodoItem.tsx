@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Todo } from '../../hooks/useTodos';
-import { PrioritySelect, PriorityBadge, Priority, DatePicker, DueDateBadge, TagBadge } from '../shared';
+import { PrioritySelect, PriorityBadge, Priority, DatePicker, DueDateBadge, TagBadge, RecurrenceBadge } from '../shared';
 import { SubtaskList } from './SubtaskList';
 import { cn } from '../../lib/utils';
 import { useFocusStore } from '../../stores/focusStore';
@@ -159,6 +159,7 @@ export function TodoItem({
             </h3>
             <PriorityBadge priority={todo.priority as Priority} />
             <DueDateBadge dueDate={todo.due_date} />
+            <RecurrenceBadge pattern={todo.recurrence_pattern} />
           </div>
           {todo.tags && todo.tags.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-1">

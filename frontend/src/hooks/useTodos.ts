@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '../lib/api';
 import { Tag } from './useTags';
 
+export type RecurrencePattern = 'daily' | 'weekly' | 'monthly' | 'yearly';
+
 export type Todo = {
   id: string;
   user_id: string;
@@ -12,6 +14,12 @@ export type Todo = {
   due_date: string | null;
   position: number | null;
   tags: Tag[];
+  recurrence_pattern: RecurrencePattern | null;
+  recurrence_interval: number | null;
+  recurrence_days_of_week: number[] | null;
+  recurrence_end_date: string | null;
+  next_occurrence: string | null;
+  original_todo_id: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -28,8 +36,16 @@ export function useTodos() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: { title: string; description?: string; priority?: number; due_date?: string }) =>
-      api.post<TodoResponse>('/todos', data),
+    mutationFn: (data: {
+      title: string;
+      description?: string;
+      priority?: number;
+      due_date?: string;
+      recurrence_pattern?: RecurrencePattern;
+      recurrence_interval?: number;
+      recurrence_days_of_week?: number[];
+      recurrence_end_date?: string;
+    }) => api.post<TodoResponse>('/todos', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['todos'] });
     },
@@ -79,6 +95,14 @@ export function useTodos() {
     },
   });
 
+  const completeRecurringMutation = useMutation({
+    mutationFn: (id: string) =>
+      api.post<{ todo: Todo; nextTodo: Todo | null; message?: string }>(`/todos/${id}/complete-recurring`, {}),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['todos'] });
+    },
+  });
+
   return {
     todos: data?.todos ?? [],
     isLoading,
@@ -87,6 +111,7 @@ export function useTodos() {
     updateTodo: updateMutation.mutateAsync,
     deleteTodo: deleteMutation.mutateAsync,
     reorderTodos: reorderMutation.mutateAsync,
+    completeRecurring: completeRecurringMutation.mutateAsync,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,

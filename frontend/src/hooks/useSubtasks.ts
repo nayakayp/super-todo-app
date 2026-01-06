@@ -11,6 +11,9 @@ export type Subtask = {
   updated_at: string;
 };
 
+type SubtasksResponse = { subtasks: Subtask[] };
+type SubtaskResponse = { subtask: Subtask };
+
 export function useSubtasks(todoId: string | null) {
   const queryClient = useQueryClient();
 
@@ -18,16 +21,16 @@ export function useSubtasks(todoId: string | null) {
     queryKey: ['subtasks', todoId],
     queryFn: async () => {
       if (!todoId) return [];
-      const response = await api.get(`/subtasks/todo/${todoId}`);
-      return response.subtasks as Subtask[];
+      const response = await api.get<SubtasksResponse>(`/subtasks/todo/${todoId}`);
+      return response.subtasks;
     },
     enabled: !!todoId,
   });
 
   const createSubtaskMutation = useMutation({
     mutationFn: async ({ todoId, title }: { todoId: string; title: string }) => {
-      const response = await api.post(`/subtasks/todo/${todoId}`, { title });
-      return response.subtask as Subtask;
+      const response = await api.post<SubtaskResponse>(`/subtasks/todo/${todoId}`, { title });
+      return response.subtask;
     },
     onSuccess: (_, { todoId }) => {
       queryClient.invalidateQueries({ queryKey: ['subtasks', todoId] });
@@ -36,8 +39,8 @@ export function useSubtasks(todoId: string | null) {
 
   const updateSubtaskMutation = useMutation({
     mutationFn: async ({ id, ...updates }: { id: string; title?: string; completed?: boolean }) => {
-      const response = await api.patch(`/subtasks/${id}`, updates);
-      return response.subtask as Subtask;
+      const response = await api.patch<SubtaskResponse>(`/subtasks/${id}`, updates);
+      return response.subtask;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subtasks', todoId] });

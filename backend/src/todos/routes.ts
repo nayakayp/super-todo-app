@@ -38,17 +38,45 @@ todosRoutes.get('/', async (c) => {
 
 todosRoutes.post('/', async (c) => {
   const user = c.get('user');
-  const { title, description, priority, due_date } = await c.req.json();
+  const {
+    title,
+    description,
+    priority,
+    due_date,
+    recurrence_pattern,
+    recurrence_interval,
+    recurrence_days_of_week,
+    recurrence_end_date,
+  } = await c.req.json();
 
   if (!title) {
     return c.json({ error: 'Title is required' }, 400);
   }
 
+  // Calculate next_occurrence based on recurrence pattern
+  let next_occurrence = null;
+  if (recurrence_pattern && due_date) {
+    next_occurrence = due_date;
+  }
+
   const result = await db.query(
-    `INSERT INTO todos (user_id, title, description, priority, due_date)
-     VALUES ($1, $2, $3, $4, $5)
+    `INSERT INTO todos (user_id, title, description, priority, due_date,
+     recurrence_pattern, recurrence_interval, recurrence_days_of_week,
+     recurrence_end_date, next_occurrence)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
      RETURNING *`,
-    [user.id, title, description || null, priority || 0, due_date || null]
+    [
+      user.id,
+      title,
+      description || null,
+      priority || 0,
+      due_date || null,
+      recurrence_pattern || null,
+      recurrence_interval || 1,
+      recurrence_days_of_week || null,
+      recurrence_end_date || null,
+      next_occurrence,
+    ]
   );
 
   return c.json({ todo: result.rows[0] }, 201);
@@ -77,7 +105,19 @@ todosRoutes.patch('/:id', async (c) => {
     return c.json({ error: 'Todo not found' }, 404);
   }
 
-  const allowedFields = ['title', 'description', 'completed', 'priority', 'due_date', 'position'];
+  const allowedFields = [
+    'title',
+    'description',
+    'completed',
+    'priority',
+    'due_date',
+    'position',
+    'recurrence_pattern',
+    'recurrence_interval',
+    'recurrence_days_of_week',
+    'recurrence_end_date',
+    'next_occurrence',
+  ];
   const setClause: string[] = [];
   const values: unknown[] = [];
   let paramIndex = 1;
@@ -148,4 +188,120 @@ todosRoutes.post('/reorder', async (c) => {
   }
 
   return c.json({ success: true });
+});
+
+// Helper function to calculate next occurrence
+function calculateNextOccurrence(
+  currentDate: Date,
+  pattern: string,
+  interval: number,
+  daysOfWeek?: number[]
+): Date {
+  const next = new Date(currentDate);
+
+  switch (pattern) {
+    case 'daily':
+      next.setDate(next.getDate() + interval);
+      break;
+    case 'weekly':
+      if (daysOfWeek && daysOfWeek.length > 0) {
+        // Find next matching day of week
+        let found = false;
+        for (let i = 1; i <= 7 * interval && !found; i++) {
+          next.setDate(currentDate.getDate() + i);
+          if (daysOfWeek.includes(next.getDay())) {
+            found = true;
+          }
+        }
+        if (!found) {
+          next.setDate(currentDate.getDate() + 7 * interval);
+        }
+      } else {
+        next.setDate(next.getDate() + 7 * interval);
+      }
+      break;
+    case 'monthly':
+      next.setMonth(next.getMonth() + interval);
+      break;
+    case 'yearly':
+      next.setFullYear(next.getFullYear() + interval);
+      break;
+    default:
+      next.setDate(next.getDate() + interval);
+  }
+
+  return next;
+}
+
+// Complete a recurring todo and create next occurrence
+todosRoutes.post('/:id/complete-recurring', async (c) => {
+  const user = c.get('user');
+  const id = c.req.param('id');
+
+  const todoResult = await db.query(
+    'SELECT * FROM todos WHERE id = $1 AND user_id = $2',
+    [id, user.id]
+  );
+
+  if (todoResult.rows.length === 0) {
+    return c.json({ error: 'Todo not found' }, 404);
+  }
+
+  const todo = todoResult.rows[0];
+
+  if (!todo.recurrence_pattern) {
+    return c.json({ error: 'Todo is not recurring' }, 400);
+  }
+
+  // Mark current todo as completed
+  await db.query(
+    'UPDATE todos SET completed = true, updated_at = CURRENT_TIMESTAMP WHERE id = $1',
+    [id]
+  );
+
+  // Calculate next occurrence
+  const currentDueDate = todo.due_date ? new Date(todo.due_date) : new Date();
+  const nextDate = calculateNextOccurrence(
+    currentDueDate,
+    todo.recurrence_pattern,
+    todo.recurrence_interval || 1,
+    todo.recurrence_days_of_week
+  );
+
+  // Check if next occurrence is beyond end date
+  if (todo.recurrence_end_date && nextDate > new Date(todo.recurrence_end_date)) {
+    return c.json({
+      todo: { ...todo, completed: true },
+      nextTodo: null,
+      message: 'Recurrence ended',
+    });
+  }
+
+  // Create next occurrence
+  const nextTodoResult = await db.query(
+    `INSERT INTO todos (
+      user_id, title, description, priority, due_date,
+      recurrence_pattern, recurrence_interval, recurrence_days_of_week,
+      recurrence_end_date, next_occurrence, original_todo_id
+    ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    RETURNING *`,
+    [
+      user.id,
+      todo.title,
+      todo.description,
+      todo.priority,
+      nextDate.toISOString().split('T')[0],
+      todo.recurrence_pattern,
+      todo.recurrence_interval,
+      todo.recurrence_days_of_week,
+      todo.recurrence_end_date,
+      nextDate.toISOString().split('T')[0],
+      todo.original_todo_id || todo.id,
+    ]
+  );
+
+  return c.json({
+    todo: { ...todo, completed: true },
+    nextTodo: nextTodoResult.rows[0],
+  });
 });
