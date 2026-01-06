@@ -3,6 +3,7 @@ import { QueryProvider } from './lib/queryClient';
 import { useAuthStore } from './stores/authStore';
 import { useTheme } from './hooks/useTheme';
 import { HomePage } from './pages/HomePage';
+import { StatsPage } from './pages/StatsPage';
 import { SignInPage } from './pages/SignInPage';
 import { SignUpPage } from './pages/SignUpPage';
 import './index.css';
@@ -31,6 +32,7 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<ProtectedRoute><HomePage /></ProtectedRoute>} />
+          <Route path="/stats" element={<ProtectedRoute><StatsPage /></ProtectedRoute>} />
           <Route path="/sign-in" element={<PublicRoute><SignInPage /></PublicRoute>} />
           <Route path="/sign-up" element={<PublicRoute><SignUpPage /></PublicRoute>} />
         </Routes>

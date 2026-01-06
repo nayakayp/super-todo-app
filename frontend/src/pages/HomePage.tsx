@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { useTodos, Todo } from '../hooks/useTodos';
 import { useAuth } from '../hooks/useAuth';
 import {
@@ -375,6 +376,17 @@ export function HomePage() {
           <aside className="lg:col-span-1 space-y-6">
             <FocusTimer />
             <ProgressStats todos={todos} />
+            <Link
+              to="/stats"
+              className="block w-full py-2 px-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-center rounded-lg shadow hover:from-blue-600 hover:to-purple-700 transition-all font-medium"
+            >
+              <span className="flex items-center justify-center gap-2">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                View Detailed Statistics
+              </span>
+            </Link>
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
               <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Quick Tips</h3>
               <ul className="space-y-2 text-xs text-gray-500 dark:text-gray-400">
