@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application>
+  <name>Super Todo App</name>
+  <description>A fullstack todo web application with authentication, task management, and modern tech stack</description>
+  <type>fullstack</type>
+  <architecture>monorepo</architecture>
+
+  <frontend>
+    <framework>React</framework>
+    <build-tool>Vite</build-tool>
+    <language>TypeScript</language>
+    <port>5173</port>
+    
+    <dependencies>
+      <dependency name="react" purpose="UI library" />
+      <dependency name="react-dom" purpose="React DOM rendering" />
+      <dependency name="@tanstack/react-query" purpose="Server state management and HTTP request handling" />
+      <dependency name="zustand" purpose="Client state management" />
+      <dependency name="react-router-dom" purpose="Client-side routing" />
+      <dependency name="axios" purpose="HTTP client for API requests" />
+      <dependency name="tailwindcss" purpose="Utility-first CSS framework" />
+      <dependency name="shadcn/ui" purpose="Accessible and customizable UI component library" />
+      <dependency name="lucide-react" purpose="Icon library for shadcn/ui" />
+      <dependency name="class-variance-authority" purpose="CSS class variant management" />
+      <dependency name="clsx" purpose="Conditional class name utility" />
+      <dependency name="tailwind-merge" purpose="Merge Tailwind classes without conflicts" />
+    </dependencies>
+
+    <ui-library>
+      <name>shadcn/ui</name>
+      <styling>Tailwind CSS</styling>
+      <components>
+        <component name="Button" />
+        <component name="Input" />
+        <component name="Card" />
+        <component name="Checkbox" />
+        <component name="Dialog" />
+        <component name="DropdownMenu" />
+        <component name="Form" />
+        <component name="Label" />
+        <component name="Select" />
+        <component name="Separator" />
+        <component name="Toast" />
+        <component name="Badge" />
+      </components>
+    </ui-library>
+
+    <features>
+      <feature name="authentication">
+        <description>User login, registration, and session management</description>
+        <pages>
+          <page>Login</page>
+          <page>Register</page>
+        </pages>
+      </feature>
+      <feature name="todo-management">
+        <description>CRUD operations for todo items</description>
+        <pages>
+          <page>Dashboard</page>
+          <page>TodoList</page>
+          <page>TodoDetail</page>
+        </pages>
+        <capabilities>
+          <capability>Create new todos</capability>
+          <capability>View all todos</capability>
+          <capability>Update todo status and content</capability>
+          <capability>Delete todos</capability>
+          <capability>Filter todos by status</capability>
+          <capability>Search todos</capability>
+        </capabilities>
+      </feature>
+    </features>
+
+    <state-management>
+      <library>Zustand</library>
+      <stores>
+        <store name="authStore">
+          <purpose>Manage authentication state</purpose>
+          <state>
+            <field name="user" type="User | null" />
+            <field name="isAuthenticated" type="boolean" />
+          </state>
+        </store>
+        <store name="uiStore">
+          <purpose>Manage UI state like modals, filters</purpose>
+          <state>
+            <field name="filter" type="FilterType" />
+            <field name="searchQuery" type="string" />
+          </state>
+        </store>
+      </stores>
+    </state-management>
+
+    <data-fetching>
+      <library>@tanstack/react-query</library>
+      <queries>
+        <query name="useTodos" endpoint="GET /api/todos" />
+        <query name="useTodo" endpoint="GET /api/todos/:id" />
+      </queries>
+      <mutations>
+        <mutation name="useCreateTodo" endpoint="POST /api/todos" />
+        <mutation name="useUpdateTodo" endpoint="PUT /api/todos/:id" />
+        <mutation name="useDeleteTodo" endpoint="DELETE /api/todos/:id" />
+      </mutations>
+    </data-fetching>
+
+    <directory-structure>
+      <folder name="src">
+        <folder name="components" description="Reusable UI components" />
+        <folder name="pages" description="Page components" />
+        <folder name="hooks" description="Custom React hooks" />
+        <folder name="stores" description="Zustand stores" />
+        <folder name="api" description="API client and query hooks" />
+        <folder name="types" description="TypeScript type definitions" />
+        <folder name="utils" description="Utility functions" />
+      </folder>
+    </directory-structure>
+  </frontend>
+
+  <backend>
+    <framework>Hono</framework>
+    <language>TypeScript</language>
+    <runtime>Node.js</runtime>
+    <port>3000</port>
+
+    <dependencies>
+      <dependency name="hono" purpose="Web framework for REST API" />
+      <dependency name="better-auth" purpose="Authentication library" />
+      <dependency name="drizzle-orm" purpose="TypeScript ORM" />
+      <dependency name="drizzle-kit" purpose="Drizzle migrations and studio" />
+      <dependency name="pg" purpose="PostgreSQL driver" />
+      <dependency name="@hono/node-server" purpose="Node.js adapter for Hono" />
+      <dependency name="zod" purpose="Schema validation" />
+    </dependencies>
+
+    <authentication>
+      <library>better-auth</library>
+      <features>
+        <feature>Email/Password authentication</feature>
+        <feature>Session management</feature>
+        <feature>Protected routes middleware</feature>
+      </features>
+      <endpoints>
+        <endpoint method="POST" path="/api/auth/sign-up" description="User registration" />
+        <endpoint method="POST" path="/api/auth/sign-in" description="User login" />
+        <endpoint method="POST" path="/api/auth/sign-out" description="User logout" />
+        <endpoint method="GET" path="/api/auth/session" description="Get current session" />
+      </endpoints>
+    </authentication>
+
+    <api-endpoints>
+      <resource name="todos">
+        <endpoint method="GET" path="/api/todos" description="Get all todos for authenticated user" />
+        <endpoint method="GET" path="/api/todos/:id" description="Get a specific todo" />
+        <endpoint method="POST" path="/api/todos" description="Create a new todo" />
+        <endpoint method="PUT" path="/api/todos/:id" description="Update a todo" />
+        <endpoint method="DELETE" path="/api/todos/:id" description="Delete a todo" />
+      </resource>
+    </api-endpoints>
+
+    <database>
+      <type>PostgreSQL</type>
+      <orm>Drizzle</orm>
+      <schemas>
+        <table name="users">
+          <column name="id" type="uuid" primary="true" />
+          <column name="email" type="varchar(255)" unique="true" />
+          <column name="name" type="varchar(255)" />
+          <column name="password" type="varchar(255)" />
+          <column name="createdAt" type="timestamp" default="now()" />
+          <column name="updatedAt" type="timestamp" default="now()" />
+        </table>
+        <table name="sessions">
+          <column name="id" type="uuid" primary="true" />
+          <column name="userId" type="uuid" references="users.id" />
+          <column name="token" type="varchar(255)" />
+          <column name="expiresAt" type="timestamp" />
+        </table>
+        <table name="todos">
+          <column name="id" type="uuid" primary="true" />
+          <column name="userId" type="uuid" references="users.id" />
+          <column name="title" type="varchar(255)" />
+          <column name="description" type="text" nullable="true" />
+          <column name="completed" type="boolean" default="false" />
+          <column name="priority" type="enum(low,medium,high)" default="medium" />
+          <column name="dueDate" type="timestamp" nullable="true" />
+          <column name="createdAt" type="timestamp" default="now()" />
+          <column name="updatedAt" type="timestamp" default="now()" />
+        </table>
+      </schemas>
+    </database>
+
+    <directory-structure>
+      <folder name="src">
+        <folder name="routes" description="API route handlers" />
+        <folder name="db" description="Database schema and connection" />
+        <folder name="middleware" description="Hono middleware" />
+        <folder name="lib" description="Shared utilities and auth config" />
+        <folder name="types" description="TypeScript type definitions" />
+      </folder>
+    </directory-structure>
+  </backend>
+
+  <deployment>
+    <tool>Docker Compose</tool>
+    <services>
+      <service name="frontend">
+        <description>React Vite application</description>
+        <port>5173:5173</port>
+        <build>./frontend</build>
+        <depends_on>backend</depends_on>
+      </service>
+      <service name="backend">
+        <description>Hono REST API</description>
+        <port>3000:3000</port>
+        <build>./backend</build>
+        <depends_on>database</depends_on>
+        <environment>
+          <variable name="DATABASE_URL" value="postgresql://user:password@database:5432/todoapp" />
+          <variable name="BETTER_AUTH_SECRET" value="your-secret-key" />
+        </environment>
+      </service>
+      <service name="database">
+        <description>PostgreSQL database</description>
+        <image>postgres:16-alpine</image>
+        <port>5432:5432</port>
+        <volumes>
+          <volume>postgres_data:/var/lib/postgresql/data</volume>
+        </volumes>
+        <environment>
+          <variable name="POSTGRES_USER" value="user" />
+          <variable name="POSTGRES_PASSWORD" value="password" />
+          <variable name="POSTGRES_DB" value="todoapp" />
+        </environment>
+      </service>
+    </services>
+    <volumes>
+      <volume name="postgres_data" />
+    </volumes>
+    <networks>
+      <network name="app-network" driver="bridge" />
+    </networks>
+  </deployment>
+
+  <project-structure>
+    <root>
+      <folder name="frontend" description="React Vite frontend application" />
+      <folder name="backend" description="Hono REST API backend" />
+      <file name="docker-compose.yml" description="Docker Compose configuration" />
+      <file name="README.md" description="Project documentation" />
+    </root>
+  </project-structure>
+</application>
