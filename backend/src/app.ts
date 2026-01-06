@@ -3,8 +3,11 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { authRoutes } from './auth/routes';
 import { todosRoutes } from './todos/routes';
+import { errorHandler } from './middleware/errorHandler';
 
 const app = new Hono();
+
+app.onError(errorHandler);
 
 app.use('*', logger());
 app.use('*', cors({
