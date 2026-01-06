@@ -20,3 +20,4 @@ export { RecurrenceSelect, RecurrenceBadge } from './RecurrenceSelect';
 export { TimeTracker, ActiveTimeTrackerWidget, TimeEntryList } from './TimeTracker';
 export { QuickAddTemplates } from './QuickAddTemplates';
 export { ProjectSelector, ProjectSidebar, ProjectBadge } from './ProjectManager';
+export { NaturalDatePicker, CompactNaturalDatePicker } from './NaturalDatePicker';
