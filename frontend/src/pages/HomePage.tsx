@@ -29,6 +29,7 @@ import {
   QuickAddTemplates,
   ProjectSidebar,
   StreakDisplay,
+  SmartSuggestions,
 } from '../components/shared';
 import { TodoSearch, DraggableTodoList } from '../components/todos';
 import { useUIStore } from '../stores/uiStore';
@@ -396,6 +397,7 @@ export function HomePage() {
             />
             <QuickAddTemplates />
             <ProgressStats todos={todos} />
+            <SmartSuggestions todos={todos} />
             <Link
               to="/stats"
               className="block w-full py-2 px-4 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-center rounded-lg shadow hover:from-blue-600 hover:to-purple-700 transition-all font-medium"

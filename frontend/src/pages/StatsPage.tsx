@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useTodos } from '../hooks/useTodos';
 import { useFocusStore } from '../stores/focusStore';
 import { useNavigate } from 'react-router-dom';
-import { EisenhowerMatrix, WeeklyReview, StreakCalendar } from '../components/shared';
+import { EisenhowerMatrix, WeeklyReview, StreakCalendar, ProductivityCharts } from '../components/shared';
 
 type StatCardProps = {
   title: string;
@@ -401,6 +401,9 @@ export function StatsPage() {
 
         {/* Activity Heat Map */}
         <StreakCalendar />
+
+        {/* Productivity Charts */}
+        <ProductivityCharts todos={todos} />
 
         {/* Weekly Review */}
         <WeeklyReview todos={todos} />

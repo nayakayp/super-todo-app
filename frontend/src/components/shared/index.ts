@@ -28,3 +28,5 @@ export { EisenhowerMatrix, EisenhowerWidget } from './EisenhowerMatrix';
 export { WeeklyReview, WeeklyReviewWidget } from './WeeklyReview';
 export { StreakDisplay, StreakBadge, GoalsSettings, StreakCalendar } from './StreakTracker';
 export { AdvancedSearch, QuickSearchModal } from './AdvancedSearch';
+export { SmartSuggestions, ProductivityTips } from './SmartSuggestions';
+export { ProductivityCharts } from './ProductivityCharts';
