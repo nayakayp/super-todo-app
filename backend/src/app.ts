@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { authRoutes } from './auth/routes';
+import { todosRoutes } from './todos/routes';
 
 const app = new Hono();
 
@@ -20,5 +21,6 @@ app.get('/health', (c) => {
 });
 
 app.route('/api/auth', authRoutes);
+app.route('/api/todos', todosRoutes);
 
 export { app };
