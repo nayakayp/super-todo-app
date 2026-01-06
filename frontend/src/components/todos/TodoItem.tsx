@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Todo } from '../../hooks/useTodos';
 import { PrioritySelect, PriorityBadge, Priority, DatePicker, DueDateBadge, TagBadge } from '../shared';
+import { SubtaskList } from './SubtaskList';
 import { cn } from '../../lib/utils';
 import { useFocusStore } from '../../stores/focusStore';
 
@@ -31,6 +32,7 @@ export function TodoItem({
   const [editPriority, setEditPriority] = useState<Priority>(todo.priority as Priority);
   const [editDueDate, setEditDueDate] = useState(todo.due_date || '');
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showSubtasks, setShowSubtasks] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   const { isActive, focusedTodoId, startTimer } = useFocusStore();
@@ -183,9 +185,20 @@ export function TodoItem({
               )}
             </p>
           )}
-          <div className="mt-2 text-xs text-gray-400 dark:text-gray-500">
-            Created {new Date(todo.created_at).toLocaleDateString()}
+          <div className="mt-2 text-xs text-gray-400 dark:text-gray-500 flex items-center gap-2">
+            <span>Created {new Date(todo.created_at).toLocaleDateString()}</span>
+            <button
+              onClick={() => setShowSubtasks(!showSubtasks)}
+              className="text-blue-500 hover:text-blue-600 dark:hover:text-blue-400"
+            >
+              {showSubtasks ? 'Hide' : 'Show'} subtasks
+            </button>
           </div>
+          {showSubtasks && (
+            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+              <SubtaskList todoId={todo.id} />
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
           {!todo.completed && (
