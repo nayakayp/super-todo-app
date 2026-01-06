@@ -30,3 +30,4 @@ export { StreakDisplay, StreakBadge, GoalsSettings, StreakCalendar } from './Str
 export { AdvancedSearch, QuickSearchModal } from './AdvancedSearch';
 export { SmartSuggestions, ProductivityTips } from './SmartSuggestions';
 export { ProductivityCharts } from './ProductivityCharts';
+export { DependencyManager, BlockerBadge, DependencyGraph } from './DependencyManager';

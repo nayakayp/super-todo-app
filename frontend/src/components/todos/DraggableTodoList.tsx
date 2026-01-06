@@ -17,6 +17,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { Todo } from '../../hooks/useTodos';
 import { TodoItem } from './TodoItem';
+import { useKeyboardNavigation, FocusIndicator, KeyboardNavHelp } from '../../hooks/useKeyboardNavigation';
 
 type SortableTodoItemProps = {
   todo: Todo;
@@ -28,11 +29,13 @@ type SortableTodoItemProps = {
   onSelect?: (selected: boolean) => void;
   showCheckbox?: boolean;
   isDragDisabled?: boolean;
+  isFocused?: boolean;
 };
 
 function SortableTodoItem({
   todo,
   isDragDisabled = false,
+  isFocused = false,
   ...props
 }: SortableTodoItemProps) {
   const {
@@ -53,23 +56,25 @@ function SortableTodoItem({
 
   return (
     <div ref={setNodeRef} style={style}>
-      <div className="flex items-stretch">
-        {!isDragDisabled && (
-          <button
-            {...attributes}
-            {...listeners}
-            className="flex items-center px-2 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-            title="Drag to reorder"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
-            </svg>
-          </button>
-        )}
-        <div className="flex-1">
-          <TodoItem todo={todo} {...props} />
+      <FocusIndicator isActive={isFocused}>
+        <div className="flex items-stretch">
+          {!isDragDisabled && (
+            <button
+              {...attributes}
+              {...listeners}
+              className="flex items-center px-2 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              title="Drag to reorder"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8h16M4 16h16" />
+              </svg>
+            </button>
+          )}
+          <div className="flex-1">
+            <TodoItem todo={todo} {...props} />
+          </div>
         </div>
-      </div>
+      </FocusIndicator>
     </div>
   );
 }
@@ -110,6 +115,31 @@ export function DraggableTodoList({
     })
   );
 
+  // Keyboard navigation
+  const { focusedIndex, isNavigating } = useKeyboardNavigation({
+    itemCount: todos.length,
+    onToggle: (index) => onToggle(todos[index]),
+    onDelete: (index) => onDelete(todos[index].id),
+    onEdit: (index) => {
+      // Trigger edit by clicking the title
+      const todoEl = document.querySelector(`[data-todo-index="${index}"] h3`);
+      if (todoEl instanceof HTMLElement) todoEl.click();
+    },
+    onMoveUp: (index) => {
+      if (index > 0 && !isDragDisabled) {
+        const reorderedTodos = arrayMove(todos, index, index - 1);
+        onReorder(reorderedTodos.map((t, i) => ({ id: t.id, position: i })));
+      }
+    },
+    onMoveDown: (index) => {
+      if (index < todos.length - 1 && !isDragDisabled) {
+        const reorderedTodos = arrayMove(todos, index, index + 1);
+        onReorder(reorderedTodos.map((t, i) => ({ id: t.id, position: i })));
+      }
+    },
+    enabled: !showCheckbox, // Disable when in selection mode
+  });
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -136,19 +166,26 @@ export function DraggableTodoList({
     >
       <SortableContext items={todos.map((t) => t.id)} strategy={verticalListSortingStrategy}>
         <div className="space-y-3">
-          {todos.map((todo) => (
-            <SortableTodoItem
-              key={todo.id}
-              todo={todo}
-              onToggle={() => onToggle(todo)}
-              onDelete={() => onDelete(todo.id)}
-              onUpdate={(updates) => onUpdate(todo.id, updates)}
-              onDuplicate={() => onDuplicate(todo)}
-              isSelected={selectedIds.has(todo.id)}
-              onSelect={(selected) => onSelect(todo.id, selected)}
-              showCheckbox={showCheckbox}
-              isDragDisabled={isDragDisabled}
-            />
+          {isNavigating && (
+            <div className="flex justify-end mb-2">
+              <KeyboardNavHelp />
+            </div>
+          )}
+          {todos.map((todo, index) => (
+            <div key={todo.id} data-todo-index={index}>
+              <SortableTodoItem
+                todo={todo}
+                onToggle={() => onToggle(todo)}
+                onDelete={() => onDelete(todo.id)}
+                onUpdate={(updates) => onUpdate(todo.id, updates)}
+                onDuplicate={() => onDuplicate(todo)}
+                isSelected={selectedIds.has(todo.id)}
+                onSelect={(selected) => onSelect(todo.id, selected)}
+                showCheckbox={showCheckbox}
+                isDragDisabled={isDragDisabled}
+                isFocused={focusedIndex === index}
+              />
+            </div>
           ))}
         </div>
       </SortableContext>
