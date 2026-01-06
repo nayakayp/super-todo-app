@@ -30,6 +30,9 @@ import {
   ProjectSidebar,
   StreakDisplay,
   SmartSuggestions,
+  QuickCaptureProvider,
+  QuickCaptureButton,
+  HabitWidget,
 } from '../components/shared';
 import { TodoSearch, DraggableTodoList } from '../components/todos';
 import { useUIStore } from '../stores/uiStore';
@@ -390,6 +393,7 @@ export function HomePage() {
           {/* Sidebar with stats */}
           <aside className="lg:col-span-1 space-y-6">
             <StreakDisplay />
+            <HabitWidget />
             <FocusTimer />
             <ProjectSidebar
               selectedProjectId={selectedProjectId}
@@ -616,6 +620,13 @@ export function HomePage() {
 
       {/* Floating time tracker widget */}
       <ActiveTimeTrackerWidget />
+
+      {/* Quick capture button */}
+      <QuickCaptureButton onClick={() => {
+        // Quick capture is handled by keyboard shortcut
+        const event = new KeyboardEvent('keydown', { key: '`' });
+        window.dispatchEvent(event);
+      }} />
     </div>
   );
 }

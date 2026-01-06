@@ -31,3 +31,6 @@ export { AdvancedSearch, QuickSearchModal } from './AdvancedSearch';
 export { SmartSuggestions, ProductivityTips } from './SmartSuggestions';
 export { ProductivityCharts } from './ProductivityCharts';
 export { DependencyManager, BlockerBadge, DependencyGraph } from './DependencyManager';
+export { BatchOperationsModal, BatchFAB } from './BatchOperationsModal';
+export { QuickCapture, QuickCaptureProvider, QuickCaptureButton } from './QuickCapture';
+export { HabitTracker, HabitWidget, useHabitStore } from './HabitTracker';

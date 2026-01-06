@@ -7,6 +7,7 @@ import { StatsPage } from './pages/StatsPage';
 import { CalendarPage } from './pages/CalendarPage';
 import { SignInPage } from './pages/SignInPage';
 import { SignUpPage } from './pages/SignUpPage';
+import { QuickCaptureProvider } from './components/shared';
 import './index.css';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
