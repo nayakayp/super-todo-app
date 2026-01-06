@@ -21,3 +21,4 @@ export { TimeTracker, ActiveTimeTrackerWidget, TimeEntryList } from './TimeTrack
 export { QuickAddTemplates } from './QuickAddTemplates';
 export { ProjectSelector, ProjectSidebar, ProjectBadge } from './ProjectManager';
 export { NaturalDatePicker, CompactNaturalDatePicker } from './NaturalDatePicker';
+export { ActivityFeed, TodoActivityHistory, ActivityTimeline } from './ActivityFeed';
