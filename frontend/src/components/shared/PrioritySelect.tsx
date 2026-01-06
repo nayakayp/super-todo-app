@@ -34,7 +34,7 @@ export function PrioritySelect({ value, onChange, className }: PrioritySelectPro
 }
 
 export function PriorityBadge({ priority }: { priority: Priority }) {
-  const config = priorities.find((p) => p.value === priority) ?? priorities[0];
+  const config = priorities.find((p) => p.value === priority) ?? priorities[0]!;
   return (
     <span className={cn('text-xs font-medium', config.color)}>
       {config.label}

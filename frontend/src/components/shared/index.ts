@@ -6,3 +6,7 @@ export { PrioritySelect, PriorityBadge, type Priority } from './PrioritySelect';
 export { DatePicker, DueDateBadge, formatDueDate } from './DatePicker';
 export { ThemeToggle } from './ThemeToggle';
 export { SearchInput } from './SearchInput';
+export { SortSelect, type SortOption, type SortDirection } from './SortSelect';
+export { BulkActions } from './BulkActions';
+export { ProgressStats } from './ProgressStats';
+export { useKeyboardShortcuts, KeyboardShortcutsModal } from './KeyboardShortcuts';
