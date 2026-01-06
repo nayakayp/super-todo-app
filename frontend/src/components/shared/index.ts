@@ -36,3 +36,6 @@ export { QuickCapture, QuickCaptureProvider, QuickCaptureButton } from './QuickC
 export { HabitTracker, HabitWidget, useHabitStore } from './HabitTracker';
 export { LevelBadge, XPProgress, AchievementsList, GamificationStats, AchievementNotification, AchievementBadge, useGamificationStore } from './Gamification';
 export { WorkspaceSwitcher, TeamMembers, useWorkspaceStore } from './Workspace';
+export { AnalyticsDashboard } from './AnalyticsDashboard';
+export { VoiceCommands, VoiceCommandsHelp } from './VoiceCommands';
+export { IntegrationsPanel, IntegrationsWidget, useIntegrationStore } from './Integrations';
