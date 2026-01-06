@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTodos, Todo } from '../hooks/useTodos';
 import { useAuth } from '../hooks/useAuth';
-import { EmptyState, TodoListSkeleton } from '../components/shared';
+import { EmptyState, TodoListSkeleton, FilterTabs } from '../components/shared';
+import { useUIStore } from '../stores/uiStore';
 
 function TodoItem({ todo, onToggle, onDelete }: { todo: Todo; onToggle: () => void; onDelete: () => void }) {
   return (
@@ -26,8 +27,20 @@ function TodoItem({ todo, onToggle, onDelete }: { todo: Todo; onToggle: () => vo
 export function HomePage() {
   const { user, signOut, isSigningOut } = useAuth();
   const { todos, isLoading, createTodo, updateTodo, deleteTodo, isCreating } = useTodos();
+  const filter = useUIStore((state) => state.filter);
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
+
+  const filteredTodos = useMemo(() => {
+    switch (filter) {
+      case 'active':
+        return todos.filter((todo) => !todo.completed);
+      case 'completed':
+        return todos.filter((todo) => todo.completed);
+      default:
+        return todos;
+    }
+  }, [todos, filter]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,12 +96,18 @@ export function HomePage() {
           />
         </form>
 
+        {todos.length > 0 && (
+          <div className="mb-6 flex justify-center">
+            <FilterTabs />
+          </div>
+        )}
+
         {isLoading ? (
           <TodoListSkeleton count={3} />
-        ) : todos.length === 0 ? (
+        ) : filteredTodos.length === 0 ? (
           <EmptyState
-            title="No todos yet"
-            description="Get started by adding your first todo above."
+            title={filter === 'all' ? "No todos yet" : `No ${filter} todos`}
+            description={filter === 'all' ? "Get started by adding your first todo above." : `You don't have any ${filter} todos.`}
             icon={
               <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -97,7 +116,7 @@ export function HomePage() {
           />
         ) : (
           <div className="space-y-4">
-            {todos.map((todo) => (
+            {filteredTodos.map((todo) => (
               <TodoItem
                 key={todo.id}
                 todo={todo}
