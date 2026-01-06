@@ -34,3 +34,5 @@ export { DependencyManager, BlockerBadge, DependencyGraph } from './DependencyMa
 export { BatchOperationsModal, BatchFAB } from './BatchOperationsModal';
 export { QuickCapture, QuickCaptureProvider, QuickCaptureButton } from './QuickCapture';
 export { HabitTracker, HabitWidget, useHabitStore } from './HabitTracker';
+export { LevelBadge, XPProgress, AchievementsList, GamificationStats, AchievementNotification, AchievementBadge, useGamificationStore } from './Gamification';
+export { WorkspaceSwitcher, TeamMembers, useWorkspaceStore } from './Workspace';
