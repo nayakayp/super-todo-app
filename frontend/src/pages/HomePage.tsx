@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useTodos, Todo } from '../hooks/useTodos';
 import { useAuth } from '../hooks/useAuth';
-import { EmptyState, TodoListSkeleton, FilterTabs } from '../components/shared';
+import { EmptyState, TodoListSkeleton, FilterTabs, PrioritySelect, PriorityBadge, Priority } from '../components/shared';
 import { useUIStore } from '../stores/uiStore';
 
 function TodoItem({ todo, onToggle, onDelete }: { todo: Todo; onToggle: () => void; onDelete: () => void }) {
@@ -14,7 +14,10 @@ function TodoItem({ todo, onToggle, onDelete }: { todo: Todo; onToggle: () => vo
         className="w-5 h-5"
       />
       <div className="flex-1">
-        <h3 className={`font-medium ${todo.completed ? 'line-through' : ''}`}>{todo.title}</h3>
+        <div className="flex items-center gap-2">
+          <h3 className={`font-medium ${todo.completed ? 'line-through' : ''}`}>{todo.title}</h3>
+          <PriorityBadge priority={todo.priority as Priority} />
+        </div>
         {todo.description && <p className="text-gray-600 text-sm">{todo.description}</p>}
       </div>
       <button onClick={onDelete} className="text-red-500 hover:text-red-700">
@@ -30,6 +33,7 @@ export function HomePage() {
   const filter = useUIStore((state) => state.filter);
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
+  const [newPriority, setNewPriority] = useState<Priority>(0);
 
   const filteredTodos = useMemo(() => {
     switch (filter) {
@@ -45,9 +49,10 @@ export function HomePage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
-    await createTodo({ title: newTitle, description: newDescription || undefined });
+    await createTodo({ title: newTitle, description: newDescription || undefined, priority: newPriority });
     setNewTitle('');
     setNewDescription('');
+    setNewPriority(0);
   };
 
   const handleToggle = async (todo: Todo) => {
@@ -94,6 +99,10 @@ export function HomePage() {
             placeholder="Description (optional)"
             className="input mt-2"
           />
+          <div className="mt-2 flex items-center gap-2">
+            <label className="text-sm text-gray-600">Priority:</label>
+            <PrioritySelect value={newPriority} onChange={setNewPriority} />
+          </div>
         </form>
 
         {todos.length > 0 && (
