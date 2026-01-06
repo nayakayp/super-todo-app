@@ -23,3 +23,6 @@ export { ProjectSelector, ProjectSidebar, ProjectBadge } from './ProjectManager'
 export { NaturalDatePicker, CompactNaturalDatePicker } from './NaturalDatePicker';
 export { ActivityFeed, TodoActivityHistory, ActivityTimeline } from './ActivityFeed';
 export { CalendarView, MiniCalendar } from './CalendarView';
+export { MarkdownRenderer, MarkdownPreview } from './MarkdownRenderer';
+export { EisenhowerMatrix, EisenhowerWidget } from './EisenhowerMatrix';
+export { WeeklyReview, WeeklyReviewWidget } from './WeeklyReview';

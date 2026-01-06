@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useTodos } from '../hooks/useTodos';
 import { useFocusStore } from '../stores/focusStore';
 import { useNavigate } from 'react-router-dom';
+import { EisenhowerMatrix, WeeklyReview } from '../components/shared';
 
 type StatCardProps = {
   title: string;
@@ -394,6 +395,12 @@ export function StatsPage() {
             </div>
           </div>
         </div>
+
+        {/* Eisenhower Matrix */}
+        <EisenhowerMatrix todos={todos} />
+
+        {/* Weekly Review */}
+        <WeeklyReview todos={todos} />
       </main>
     </div>
   );

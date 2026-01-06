@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Todo } from '../../hooks/useTodos';
-import { PrioritySelect, PriorityBadge, Priority, DatePicker, DueDateBadge, TagBadge, RecurrenceBadge, TimeTracker, TimeEntryList } from '../shared';
+import { PrioritySelect, PriorityBadge, Priority, DatePicker, DueDateBadge, TagBadge, RecurrenceBadge, TimeTracker, TimeEntryList, MarkdownRenderer } from '../shared';
 import { SubtaskList } from './SubtaskList';
 import { cn } from '../../lib/utils';
 import { useFocusStore } from '../../stores/focusStore';
@@ -90,10 +90,13 @@ export function TodoItem({
         <textarea
           value={editDescription}
           onChange={(e) => setEditDescription(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-2 resize-none"
-          placeholder="Description (optional)"
-          rows={2}
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white mb-1 resize-none font-mono text-sm"
+          placeholder="Description (supports **bold**, *italic*, - lists, [links](url))"
+          rows={3}
         />
+        <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">
+          Markdown supported: **bold**, *italic*, `code`, - lists, [links](url)
+        </p>
         <div className="flex items-center gap-4 mb-3">
           <div className="flex items-center gap-2">
             <label className="text-sm text-gray-600 dark:text-gray-300">Priority:</label>
@@ -171,22 +174,22 @@ export function TodoItem({
             </div>
           )}
           {todo.description && (
-            <p
+            <div
               className={cn(
-                'text-gray-600 dark:text-gray-400 text-sm mt-1',
+                'text-sm mt-1',
                 !isExpanded && todo.description.length > 100 && 'line-clamp-2'
               )}
             >
-              {todo.description}
+              <MarkdownRenderer content={todo.description} compact />
               {todo.description.length > 100 && (
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
-                  className="ml-1 text-blue-600 dark:text-blue-400 hover:underline"
+                  className="ml-1 text-blue-600 dark:text-blue-400 hover:underline text-xs"
                 >
                   {isExpanded ? 'less' : 'more'}
                 </button>
               )}
-            </p>
+            </div>
           )}
           <div className="mt-2 text-xs text-gray-400 dark:text-gray-500 flex items-center gap-2 flex-wrap">
             <span>Created {new Date(todo.created_at).toLocaleDateString()}</span>

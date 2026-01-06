@@ -465,10 +465,13 @@ export function HomePage() {
                   <textarea
                     value={newDescription}
                     onChange={(e) => setNewDescription(e.target.value)}
-                    placeholder="Description (optional)"
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white resize-none"
-                    rows={2}
+                    placeholder="Description (supports **bold**, *italic*, - lists, [links](url))"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white resize-none font-mono text-sm"
+                    rows={3}
                   />
+                  <p className="text-xs text-gray-400 dark:text-gray-500 -mt-2 mb-1">
+                    Markdown supported: **bold**, *italic*, `code`, - lists
+                  </p>
                   <div className="flex flex-wrap items-center gap-4">
                     <div className="flex items-center gap-2">
                       <label className="text-sm text-gray-600 dark:text-gray-300">Priority:</label>
